@@ -38,6 +38,7 @@ const createProduct = asyncHandler(async (req, res) => {
     mes: newProduct ? "Created" : "Failed.",
   });
 });
+
 /*
   postman kiểm thử:
   POST http://localhost:5000/api/products

@@ -14,38 +14,64 @@ const DEFAULT_ADMIN = {
 };
 
 module.exports = async function initAdmin() {
-  const existedAdmin = await User.findOne({ email: DEFAULT_ADMIN.email });
-  if (existedAdmin) return console.log("Admin đã tồn tại. Bỏ qua tạo mới.");
-
-  const activeStatus = await StatusUser.findOne({ statusUserName: "active" });
-  if (!activeStatus) throw new Error("Không tìm thấy trạng thái 'active'");
-
-  const adminRole = await Role.findOne({ roleName: "admin" });
-  if (!adminRole) throw new Error("Không tìm thấy vai trò 'admin'");
-
   try {
-    // 1. Tạo tài khoản đăng nhập
+    /* ===============================
+     * 1. Đảm bảo role admin tồn tại
+     * =============================== */
+    const adminRole = await Role.findOneAndUpdate(
+      { roleName: "admin" },
+      { roleName: "admin" },
+      { new: true, upsert: true }
+    );
+
+    /* ===============================
+     * 2. Đảm bảo status active tồn tại
+     * =============================== */
+    const activeStatus = await StatusUser.findOneAndUpdate(
+      { statusUserName: "active" },
+      { statusUserName: "active" },
+      { new: true, upsert: true }
+    );
+
+    /* ===============================
+     * 3. Kiểm tra admin đã tồn tại chưa
+     * =============================== */
+    const existedAdmin = await User.findOne({ email: DEFAULT_ADMIN.email });
+    if (existedAdmin) {
+      console.log("Admin đã tồn tại. Bỏ qua tạo mới.");
+      return;
+    }
+
+    /* ===============================
+     * 4. Tạo account đăng nhập
+     * =============================== */
     const account = await Account.create({
       userName: DEFAULT_ADMIN.email,
       password: DEFAULT_ADMIN.password,
     });
 
-    // 2. Tạo user và gán vai trò admin
+    /* ===============================
+     * 5. Tạo user gán role + status
+     * =============================== */
     const user = await User.create({
       ...DEFAULT_ADMIN,
-      statusUserId: activeStatus._id,
-      roleId: adminRole._id,
       userName: DEFAULT_ADMIN.email,
+      roleId: adminRole._id,
+      statusUserId: activeStatus._id,
     });
 
-    // 3. Gắn admin
-    const admin = await Admin.create({ _id: user._id });
+    /* ===============================
+     * 6. Gắn admin
+     * =============================== */
+    await Admin.create({ _id: user._id });
 
     console.log(
-      `Đã tạo admin mặc định: ${DEFAULT_ADMIN.email}  ${DEFAULT_ADMIN.password}`
+      `Đã tạo admin mặc định:
+       Email: ${DEFAULT_ADMIN.email}
+       Password: ${DEFAULT_ADMIN.password}`
     );
   } catch (err) {
     await Account.deleteOne({ userName: DEFAULT_ADMIN.email });
-    console.error("Lỗi khi tạo admin mặc định:", err.message);
+    console.error("Lỗi khi khởi tạo admin mặc định:", err.message);
   }
 };

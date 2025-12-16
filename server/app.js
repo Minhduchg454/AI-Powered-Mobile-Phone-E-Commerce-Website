@@ -6,7 +6,7 @@ const dbConnect = require("./config/dbconnect");
 require("dotenv").config();
 const { notFound, errHandler } = require("./middlewares/errHandler");
 
-// ✅ Đặt middleware parse JSON sớm nhất có thể
+//Đặt middleware parse JSON sớm nhất có thể
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 

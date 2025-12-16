@@ -2,7 +2,7 @@ const asyncHandler = require("express-async-handler");
 const OrderDetail = require("../../models/order/OrderDetail");
 const Order = require("../../models/order/Order");
 
-// ✅ Tạo mới OrderDetail
+//Tạo mới OrderDetail
 const createNewOrderDetail = asyncHandler(async (req, res) => {
   const response = await OrderDetail.create(req.body);
   return res.json({
@@ -35,7 +35,7 @@ const getOrderDetails = async (req, res, next) => {
   }
 };
 
-// ✅ Cập nhật OrderDetail theo ID
+//Cập nhật OrderDetail theo ID
 const updateOrderDetail = asyncHandler(async (req, res) => {
   const { odid } = req.params;
 
@@ -49,7 +49,7 @@ const updateOrderDetail = asyncHandler(async (req, res) => {
   });
 });
 
-// ✅ Xoá OrderDetail theo ID
+//Xoá OrderDetail theo ID
 const deleteOrderDetail = asyncHandler(async (req, res) => {
   const { odid } = req.params;
 
@@ -60,7 +60,7 @@ const deleteOrderDetail = asyncHandler(async (req, res) => {
       message: "Không tìm thấy OrderDetail để xoá.",
     });
 
-  // Tuỳ chọn: kiểm tra xem Order đã bị hủy hay chưa trước khi xóa
+  //Tuỳ chọn: kiểm tra xem Order đã bị hủy hay chưa trước khi xóa
   const order = await Order.findById(detail.orderId);
   if (!order || order.status === "Cancelled") {
     return res.status(400).json({
